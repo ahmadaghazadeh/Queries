@@ -11,6 +11,9 @@ BEGIN TRY
     DECLARE @MaxTkeyDIn AS INTEGER;
 	DECLARE @SourceStore AS INTEGER= 2;
     DECLARE @DestStore AS INTEGER= 1;
+	DECLARE @Date AS NVARCHAR(10)=N'1395/07/12';
+	DECLARE @Time AS NVARCHAR(5)=N'14:59';
+	DECLARE @User AS NVARCHAR(50)= N'aghzadeh-a';
 
     SELECT  @MaxTkeyIn = MAX(h.tkey)+1
     FROM    dbo.inputs_h h;
@@ -31,9 +34,9 @@ BEGIN TRY
 	          isclosed
 	        )
 	VALUES  ( @MaxAccIn , -- accid - int
-	          N'aghzadeh-a' , -- mashinname - nvarchar(max)
-	          '1395/07/12' , -- accdate - char(10)
-	          '14:59' , -- acctime - char(5)
+	          @User , -- mashinname - nvarchar(max)
+	          @Date , -- accdate - char(10)
+	          @Time , -- acctime - char(5)
 	          NULL  -- isclosed - bit
 	        )
 
@@ -54,7 +57,7 @@ BEGIN TRY
             )
     VALUES  ( @MaxTkeyIn , -- tkey - int
               @MaxIdIn , -- id - int
-              '1395/07/12' , -- date - char(10)
+              @Date , -- date - char(10)
               NULL , -- factornumber - int
               6 , -- basekind - int
               @DestStore , -- stkey - int
@@ -118,9 +121,9 @@ BEGIN TRY
 	          isclosed
 	        )
 	VALUES  ( @MaxAccOut , -- accid - int
-	          N'aghzadeh-a' , -- mashinname - nvarchar(max)
-	          '1395/07/12' , -- accdate - char(10)
-	          '14:59' , -- acctime - char(5)
+	          @User , -- mashinname - nvarchar(max)
+	          @Date , -- accdate - char(10)
+	          @Time , -- acctime - char(5)
 	          NULL  -- isclosed - bit
 	        )
     INSERT  INTO dbo.outputs_h
@@ -145,7 +148,7 @@ BEGIN TRY
             )
     VALUES  ( @MaxTkeyOut , -- tkey - int
               @MaxIdOut , -- id - int
-              '1395/07/12' , -- date - char(10)
+              @Date , -- date - char(10)
               @SourceStore , -- stkey - int قزوین
               '' , -- bardate - char(10)
               @DestStore , -- pstkey - int کرج

@@ -59,11 +59,11 @@
     <Folder Include="Properties" />
     <Folder Include="Old Sale" />
     <Folder Include="Convert Old To New" />
-    <Folder Include="New Sake" />
+    <Folder Include="New Sale" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Old Sale\TransferFromStoreToStore.sql" />
     <None Include="Convert Old To New\Insert Customer Point.sql" />
-    <None Include="New Sake\sp_GetBusinessDocJSON.sql" />
+    <None Include="New SaLe\sp_GetBusinessDocJSON.sql" />
   </ItemGroup>
 </Project>

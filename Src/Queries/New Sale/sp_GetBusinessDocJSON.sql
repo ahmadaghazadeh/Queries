@@ -1,4 +1,49 @@
 ﻿ 
+  
+ALTER FUNCTION [dbo].[udft_Employee]
+						(@RunDate VARCHAR(25))
+						RETURNS TABLE 
+						AS
+						RETURN
+						(
+							WITH MyCTE AS
+							(
+								SELECT EmployeeID , EmployeeTypeID, MAX(RunDate) RunDate
+								FROM dbo.[Employee]
+								WHERE RunDate <= @RunDate
+								GROUP BY EmployeeID , EmployeeTypeID 
+							)
+							SELECT [Employee].*
+							FROM dbo.Employee
+							INNER JOIN MyCTE ON Employee.EmployeeID = MyCTE.EmployeeID AND Employee.EmployeeTypeID = MyCTE.EmployeeTypeID AND Employee.RunDate = MyCTE.RunDate AND IsDeleted = 0
+						)
+
+
+GO
+
+
+ 
+-- =============================================
+-- Author:		Ahmad Aghazadeh
+-- Create date: 1395/07/24
+-- Description:	Check employee can invoiceIssue
+-- =============================================
+ALTER PROCEDURE sp_canInvoiceIssue 
+	@EmployeeID int = 0 
+AS
+BEGIN
+	 SELECT ISNULL(ue.CanInvoiceIssue,0) CanInvoiceIssue, ISNULL(ue.WHCode,0) WHCode FROM dbo.udft_Employee('2') ue WHERE EmployeeID=@EmployeeID
+END
+GO
+ 
+
+ 
+ 
+
+GO
+
+
+
 
 ALTER PROCEDURE [dbo].[sp_GetBusinessDocJSON]
     @BusinessDocNo BIGINT  

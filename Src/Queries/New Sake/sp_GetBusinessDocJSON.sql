@@ -1,8 +1,7 @@
 ﻿ 
 
 ALTER PROCEDURE [dbo].[sp_GetBusinessDocJSON]
-    @BusinessDocNo BIGINT ,
-    @Response NVARCHAR(MAX) OUTPUT
+    @BusinessDocNo BIGINT  
 AS
     BEGIN
         BEGIN TRY
@@ -100,13 +99,13 @@ AS
                                                               uod.UnitID,
                                                               uc.MainUnitID,
                                                               '2')
-                                                        * upld.SalePrice ), 1),
+                                                        * upld.SalePrice ), 0),
                                                 0)) * uod.Qty SumPrice ,
-                            CASE WHEN ( uu.UnitID = 1 ) THEN 'ک'
+                            CASE WHEN ( uu.UnitID = 2 ) THEN 'ک'
                                  ELSE 'ب'
                             END AS Unit ,
                             uu.UnitID ,
-                            CASE WHEN uod.IsBonus = 0 THEN ' '
+                            CASE WHEN uod.IsBonus = 1 THEN ' '
                                  ELSE 'ج'
                             END AS Reward ,
                             LTRIM(RTRIM(uc.ProductName)) ProductName ,
@@ -197,7 +196,7 @@ AS
             SELECT  @TotalPrice = CAST(ISNULL(SUM(pt.SumPrice), 0) AS NUMERIC(15,
                                                               0)) ,
                     @Weight = CONVERT(NVARCHAR(20), CAST(ISNULL(SUM(pt.NetWeight
-                                                              * QTY), 0) AS DECIMAL(15,
+                                                              * QTY), 0)/1000 AS DECIMAL(15,
                                                               2))) ,
                     @CartonCount = CONVERT(NVARCHAR(50), ISNULL(CAST(SUM(CASE
                                                               WHEN ( pt.UnitId = 1 )
@@ -205,7 +204,7 @@ AS
                                                               END) AS DECIMAL(15,
                                                               0)), 0)) ,
                     @PacketCount = CONVERT(NVARCHAR(20), ISNULL(CAST(SUM(CASE
-                                                              WHEN ( pt.UnitId = 0 )
+                                                              WHEN ( pt.UnitId = 2 )
                                                               THEN QTY
                                                               END) AS DECIMAL(15,
                                                               0)), 0))
@@ -332,11 +331,11 @@ AS
                           ); 
      
             SET @Retrun = REPLACE(@Retrun, '"[@Details]"',
-                                  '[' + @Details + ']');
+                                  @Details  );
             SET @Retrun = REPLACE(@Retrun, '"[@Discount]"',
-                                  '[' + ISNULL(@Discount, ' ') + ']');
+                                  ISNULL(@Discount, '[]') );
             SET @Retrun = REPLACE(@Retrun, '"[@Additions]"',
-                                  '[' + ISNULL(@Additions, ' ') + ']');
+                                  ISNULL(@Additions, '[]') );
             DECLARE @NewLineChar AS CHAR(2) = CHAR(13) + CHAR(10);
             
 			SET @Body = N' ضمن تشکر از خرید شما . مشتری گرامی '
@@ -370,8 +369,9 @@ AS
            -- EXEC dbo.sp_Customer_Send_SMS @CustomerIds, @Body;
 		
     
-    
-            SET @Response = @Retrun;
+             SELECT  @Retrun=RIGHT(@Retrun, LEN(@Retrun) - 1);
+             SELECT  @Retrun=LEFT(@Retrun, LEN(@Retrun) - 1);
+			SELECT @Retrun respone
             COMMIT TRANSACTION T1;
         END TRY 
 	

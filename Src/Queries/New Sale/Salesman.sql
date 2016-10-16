@@ -37,7 +37,32 @@ END
 GO
  
 
- 
+ CREATE PROCEDURE [dbo].[sp_Invoice_Issue_Salesman] @OrderNo BIGINT,
+@EmployeeID BIGINT
+AS
+    BEGIN  
+        SET NOCOUNT ON;  
+    
+	
+        DECLARE @RegDate CHAR(10)=dbo.fn_GetPersianDate(GETDATE());
+        DECLARE @UserID INT;
+        DECLARE @IsManual BIT=0;
+        DECLARE @Comment NVARCHAR(MAX)='';
+        DECLARE @Result TINYINT;
+        DECLARE @BusinessDocNo BIGINT;
+        DECLARE @RunDate VARCHAR(25)=dbo.fn_GetPersianDateTime(GETDATE());
+		
+		SELECT @UserID=UserID FROM dbo.vw_User WHERE EmployeeId=@EmployeeID
+
+        EXECUTE [dbo].[sp_Invoice_Issue] @OrderNo, @RegDate, @UserID,
+            @IsManual, @Comment, @Result OUTPUT, @BusinessDocNo OUTPUT,
+            @RunDate;
+
+		SELECT @BusinessDocNo BusinessDocNo
+
+    END;  
+  
+  
  
 
 GO

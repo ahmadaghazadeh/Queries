@@ -64,6 +64,6 @@
   <ItemGroup>
     <None Include="Old Sale\TransferFromStoreToStore.sql" />
     <None Include="Convert Old To New\Insert Customer Point.sql" />
-    <None Include="New SaLe\sp_GetBusinessDocJSON.sql" />
+    <None Include="New Sale\Salesman.sql" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,27 @@
 ﻿ 
   
+
+  
+INSERT  INTO [dbo].[BranchSettings]
+        ( [Key], [Value] )
+VALUES  ( 'faraPayamakNumber', '200087125695' );
+
+GO
+
+INSERT  INTO [dbo].[BranchSettings]
+        ( [Key], [Value] )
+VALUES  ( 'faraPayamakPassword', 'Dbcoshiraz94#' );
+
+GO
+
+INSERT  INTO [dbo].[BranchSettings]
+        ( [Key], [Value] )
+VALUES  ( 'faraPayamakUserName', 'dbcoshiraz' );
+
+ GO
+
+
+
 ALTER FUNCTION [dbo].[udft_Employee]
 						(@RunDate VARCHAR(25))
 						RETURNS TABLE 
@@ -36,36 +58,63 @@ BEGIN
 END
 GO
  
-
- CREATE PROCEDURE [dbo].[sp_Invoice_Issue_Salesman] @OrderNo BIGINT,
-@EmployeeID BIGINT
+ 
+ALTER PROCEDURE [dbo].[sp_Invoice_Issue_Salesman]
+    @OrderNo BIGINT ,
+    @EmployeeID BIGINT  
 AS
     BEGIN  
-        SET NOCOUNT ON;  
-    
-	
-        DECLARE @RegDate CHAR(10)=dbo.fn_GetPersianDate(GETDATE());
+        SET NOCOUNT ON; 
+		
+		 
+        DECLARE @RegDate CHAR(10)= dbo.fn_GetPersianDate(GETDATE());
         DECLARE @UserID INT;
-        DECLARE @IsManual BIT=0;
-        DECLARE @Comment NVARCHAR(MAX)='';
+        DECLARE @IsManual BIT= 0;
+        DECLARE @Comment NVARCHAR(MAX)= '';
         DECLARE @Result TINYINT;
         DECLARE @BusinessDocNo BIGINT;
-        DECLARE @RunDate VARCHAR(25)=dbo.fn_GetPersianDateTime(GETDATE());
-		
-		SELECT @UserID=UserID FROM dbo.vw_User WHERE EmployeeId=@EmployeeID
+        DECLARE @RunDate VARCHAR(25)= dbo.fn_GetPersianDateTime(GETDATE());
+		DECLARE @response AS NVARCHAR(4000);
+        SELECT  @UserID = UserID
+        FROM    dbo.vw_User
+        WHERE   EmployeeId = @EmployeeID;
+	
+        IF @UserID IS NULL
+            BEGIN
+                SET @response = N'خطا!' + CHAR(13)
+                    + N'شماره يا پرسنل شناسايي نشد';
+            
+                RAISERROR(@response ,18 ,1);
+            END;
+     
+        BEGIN TRY
+            BEGIN TRANSACTION;
 
-        EXECUTE [dbo].[sp_Invoice_Issue] @OrderNo, @RegDate, @UserID,
-            @IsManual, @Comment, @Result OUTPUT, @BusinessDocNo OUTPUT,
-            @RunDate;
+            EXECUTE [dbo].[sp_Invoice_Issue] @OrderNo, @RegDate, @UserID,
+                @IsManual, @Comment, @Result OUTPUT, @BusinessDocNo OUTPUT,
+                @RunDate;
 
-		SELECT @BusinessDocNo BusinessDocNo
+            IF ( @Result = 0 )
+                BEGIN
+                    EXEC dbo.sp_GetBusinessDocJSON @BusinessDocNo = @BusinessDocNo;  
+                END;
+            COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+            IF ( @@TRANCOUNT > 0 )
+                ROLLBACK TRANSACTION;
 
+		    EXEC dbo.sp_Order_Delete @OrderNo ,  @RunDate, @UserID  
+		    
+            EXEC UsersManagements.dbo.sp_CatchError @RaisError = 1,
+                @ExtraData = NULL, @ErrorId = NULL;
+        END CATCH;
     END;  
   
   
- 
 
-GO
+
+
 
   
 ALTER PROCEDURE [dbo].[sp_GetBusinessDocJSON]  

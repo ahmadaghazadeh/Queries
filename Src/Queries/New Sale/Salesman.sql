@@ -4,7 +4,7 @@
   
 INSERT  INTO [dbo].[BranchSettings]
         ( [Key], [Value] )
-VALUES  ( 'faraPayamakNumber', '200087125695' );
+VALUES  ( 'faraPayamakNumber', '200095341263' );
 
 GO
 
@@ -114,7 +114,11 @@ AS
   
 
 
-
+  Go
+  
+  
+  
+  
 
   
 ALTER PROCEDURE [dbo].[sp_GetBusinessDocJSON]  
@@ -168,7 +172,7 @@ AS
           
             SELECT  @CustomerId = dbo.fn_GetCustomerID(uc.PersonID) ,  
                     @CusmtomerName = uc.PersonName ,  
-                    @CusmtomerMobile = uc.CellNo  
+                    @CusmtomerMobile =CONVERT(BIGINT, uc.CellNo  )
             FROM    dbo.udft_Person('2') AS uc  
             WHERE   uc.PersonID = @PersonID;   
           
@@ -218,11 +222,11 @@ AS
                                                               '2')  
                                                         * upld.SalePrice ), 0),  
                                                 0)) * uod.Qty SumPrice ,  
-                            CASE WHEN ( uu.UnitID = 2 ) THEN 'ک'  
+                            CASE WHEN ( uu.UnitID = 1 ) THEN 'ک'  
                                  ELSE 'ب'  
                             END AS Unit ,  
                             uu.UnitID ,  
-                            CASE WHEN uod.IsBonus = 1 THEN ' '  
+                            CASE WHEN uod.IsBonus = 0 THEN ' '  
                                  ELSE 'ج'  
                             END AS Reward ,  
                             LTRIM(RTRIM(uc.ProductName)) ProductName ,  
@@ -455,34 +459,65 @@ SET @Discount = ISNULL(( SELECT Row ,
                                   ISNULL(@Additions, '[]') );  
             DECLARE @NewLineChar AS CHAR(2) = CHAR(13) + CHAR(10);  
               
-   SET @Body = N' ضمن تشکر از خرید شما . مشتری گرامی '  
-                + @CusmtomerName  
+              SET @Body = N' ضمن تشکر از خرید شما . مشتری گرامی '  
+                + ISNULL(@CusmtomerName,'')
                 + ' فاکتور محصولات خریداری شده به شرح زیر  صادر گردید  :'  
                 + @NewLineChar + 'شماره فاکتور : '  
-                + CONVERT(NVARCHAR(10), @FactorId) + @NewLineChar + 'تعداد : ';  
-          
+                + CONVERT(NVARCHAR(10),  ISNULL(@FactorId,'') ) + @NewLineChar + 'تعداد : ';  
+        
   
+       
+
             IF @CartonCount > 0  
                 BEGIN   
-                    SET @Body = @Body + CONVERT(NVARCHAR(10), @CartonCount)  
+                    SET @Body = @Body + CONVERT(NVARCHAR(10), ISNULL(@CartonCount,'') )  
                         + ' کارتن ';  
                 END;   
   
             IF @PacketCount > 0  
                 BEGIN   
-                    SET @Body = @Body + CONVERT(NVARCHAR(10), @PacketCount)  
+                    SET @Body = @Body + CONVERT(NVARCHAR(10),ISNULL(@PacketCount,'')  )  
                         + ' بسته  ';  
                  
                 END;   
    
             SET @Body = @Body + @NewLineChar;   
           
+	 
             SET @Body = @Body + 'مبلغ به عدد : '  
                 + SaleCore.dbo.[fn_GetMoneyFormatted](@Payable, 1)  
                 + @NewLineChar + ' مبلغ به حروف : ' + @PayableLetters;  
             SET @CustomerIds = CONVERT(NVARCHAR(MAX), @CustomerId) + '|';  
   
-            -- EXEC dbo.sp_Customer_Send_SMS @CustomerIds, @Body;  
+  
+ 
+            INSERT dbo.SentMessage
+                    ( RunDate ,
+                      ProcessedReceiveID ,
+                      ToTelNo ,
+                      InsertDateTime ,
+                      SendDateTime ,
+                      MsgBody ,
+                      DebugMessage ,
+                      IsSent ,
+                      ModifyDate ,
+                      UserID ,
+                      IsDeleted ,
+                      IsDelivered
+                    )
+            VALUES  ( dbo.fn_GetPersianDateTime(GETDATE()) , 
+                      0 ,  
+                      @CusmtomerMobile ,  
+                      GETDATE() , 
+                      GETDATE() , -- SendDateTime - datetime
+                      @Body , -- MsgBody - nvarchar(max)
+                      0 , -- DebugMessage - bit
+                      0 , -- IsSent - bit
+                      GETDATE() , -- ModifyDate - varchar(25)
+                      0 , -- UserID - int
+                      0 , -- IsDeleted - bit
+                      0  -- IsDelivered - bit
+                    )
     
       
              SELECT  @Retrun=RIGHT(@Retrun, LEN(@Retrun) - 1);  
@@ -501,15 +536,3 @@ SET @Discount = ISNULL(( SELECT Row ,
         END CATCH;  
       
     END;  
-  
-    
-    
-      
-   
-  
-
-	 
-  
-    
- 
-

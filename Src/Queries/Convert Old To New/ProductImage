@@ -1,0 +1,13 @@
+ 
+ SELECT * FROM  ProductImage
+INSERT dbo.ProductImage
+        ( Shortcut ,
+          VersionNo ,
+          LastVersionDate ,
+          Image ,
+          SmallImage ,
+          UserID ,
+          StartDate ,
+          EndDate
+        )
+SELECT Shortcut,VersionNo,pl.LastVersion,pl.Image,pl.sImage,4,13950117095623000,99999999999999999 FROM sale_temp..ProductImage pl

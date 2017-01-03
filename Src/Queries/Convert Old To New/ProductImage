@@ -1,7 +1,26 @@
- 
-SELECT    Shortcut Shortcut,VersionNo VersionNo,GETDATE() LastVersionDate,Image,sImage SmallImage,4 UserID,NULL EraserUserID,dbo.fn_GetPersianDateTime(GETDATE()) StartDate,dbo.fn_GetLongDate() EndDate INTO ImageTransportTemp.dbo.ProductImageTemp  FROM sale_temp..ProductImage
-
-
+TRUNCATE TABLE ProductImage
+INSERT INTO dbo.ProductImage
+        ( Shortcut ,
+          VersionNo ,
+          LastVersionDate ,
+          Image ,
+          SmallImage ,
+          UserID ,
+          EraserUserID ,
+          StartDate ,
+          EndDate
+        )
+SELECT   CONVERT(SMALLINT,Shortcut)  ,
+          VersionNo ,
+          CONVERT(NVARCHAR,LastVersionDate)  ,
+          Image ,
+          SmallImage ,
+          UserID ,
+          EraserUserID ,
+          dbo.fn_GetPersianDateTime(GETDATE()),
+          EndDate FROM ImageTransportTemp..ProductImageTemp
+          
+          
 
  SELECT * FROM  ProductImage
 INSERT dbo.ProductImage

@@ -1,4 +1,6 @@
+
 TRUNCATE TABLE ProductImage
+CREATE DATABASE ImageTransportTemp
 INSERT INTO dbo.ProductImage
         ( Shortcut ,
           VersionNo ,

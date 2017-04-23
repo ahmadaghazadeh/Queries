@@ -1,0 +1,34 @@
+ 
+INSERT INTO dbo.CustomerPoint (
+ 	PersonID,
+	latitude,
+	longitude,
+	accuracy,
+	googleAddress,
+	RegDate,
+	StartDate,
+	EndDate,
+	UserID 
+) SELECT
+ 	dbo.fn_GetPersonID (c.moshkey),
+	ISNULL(c.latitude,0),
+	ISNULL(c.longitude,0),
+	c.accuracy,
+	c.googleAddress,
+	c. DATE,
+	dbo.fn_GetPersianDateTime( GETDATE()),
+	99999999999999999,
+	4 
+FROM
+	sale_ahwaz_1396.dbo.CustomerPoints c
+WHERE
+	id = (
+		SELECT
+			MAX (id)
+		FROM
+			sale_ahwaz_1396.dbo.CustomerPoints c1
+		WHERE
+			c1.moshkey = c.moshkey
+	)
+  
+  

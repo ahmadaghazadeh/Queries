@@ -1,0 +1,6 @@
+TRUNCATE TABLE dbo.Mobile_Shortcut
+INSERT INTO dbo.Mobile_Shortcut
+        ( Shortcut, UnitID, Visible )
+SELECT c.Shortcut,p.UnitID,1 FROM dbo.Coding c INNER JOIN dbo.ProductUnit p ON c.ProductCode=p.ProductCode 
+WHERE c.Shortcut IS NOT NULL
+GROUP BY c.Shortcut,p.UnitID

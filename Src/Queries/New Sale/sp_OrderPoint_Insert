@@ -1,0 +1,66 @@
+ALTER PROCEDURE [dbo].[sp_OrderPoint_Insert]
+    @OrderNo BIGINT ,
+    @Latitude DECIMAL(18, 14) ,
+    @Longitude DECIMAL(18, 14) ,
+    @BatteryStatus INT = 0 ,
+    @Accuracy INT = 0 ,
+    @GPSStatus BIT = 0 ,
+    @Provider NVARCHAR(20) = NULL ,
+    @UserID INT ,
+    @RunDate BIGINT
+AS
+    BEGIN
+        BEGIN TRY
+            BEGIN TRANSACTION;
+		
+
+            UPDATE  dbo.OrderPoint
+            SET     EndDate = @RunDate
+            WHERE   dbo.OrderPoint.EndDate = dbo.fn_GetMaxDateTime()
+                    AND dbo.OrderPoint.OrderNo = @OrderNo;
+
+
+            INSERT  INTO dbo.OrderPoint
+                    ( OrderNo ,
+                      Latitude ,
+                      Longitude ,
+                      BatteryStatus ,
+                      Accuracy ,
+                      Provider ,
+                      GPSStatus ,
+                      UserID ,
+                      EraserUserID ,
+                      StartDate  
+						
+                    )
+            VALUES  ( @OrderNo ,
+                      @Latitude ,
+                      @Longitude ,
+                      @BatteryStatus ,
+                      @Accuracy ,
+                      @Provider ,
+                      @GPSStatus ,
+                      @UserID ,
+                      NULL ,
+                      @RunDate 
+						
+                    );
+ 	
+            COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+            IF ( @@TRANCOUNT > 0 )
+                BEGIN
+                    BEGIN TRY
+                        ROLLBACK TRANSACTION;
+                    END TRY
+                    BEGIN CATCH
+                    END CATCH;
+                END;
+	
+            EXEC dbo.usp_CatchError @RaisError = 1, @ExtraData = NULL,
+                @ErrorId = NULL;
+        END CATCH;
+    END;
+
+GO

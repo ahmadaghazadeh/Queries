@@ -71,6 +71,36 @@ BEGIN
 END
 
 
+go
 
+DECLARE  @UserID AS INT=930294
+EXECUTE   [dbo].[sp_User_Insert] 
+   '930294'
+  ,'930294'
+  ,'حميد'
+  ,' روحي'
+  ,''
+  ,'359360056158749'
+  ,@UserID OUTPUT
+ 
+
+ INSERT INTO dbo.PrgAccess
+         ( UserID ,
+           ProgramID ,
+           AccessTypeID ,
+           CheckComputerAndLogin
+         )
+ VALUES  (@UserID , -- UserID - int
+           2 , -- ProgramID - smallint
+           255 , -- AccessTypeID - tinyint
+           0  -- CheckComputerAndLogin - tinyint
+         )
+
+		 INSERT INTO dbo.UsersInRoles
+		         ( UserID, ProgramID, RoleID )
+		 VALUES  ( @UserID, -- UserID - int
+		           2, -- ProgramID - smallint
+		           7  -- RoleID - smallint
+		           )
 
 
